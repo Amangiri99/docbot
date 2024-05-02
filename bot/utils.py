@@ -31,7 +31,7 @@ class PyMongoDriver:
     def __init__(self) -> None:
         """Method to initialize the instance variables."""
         self.db_name = self._instance.client[settings.MONGO_DB_NAME]
-        self.collection = self.db_name[settings.collection]
+        self.collection = self.db_name[settings.COLLECTION_NAME]
         self.atlas_vector_search_index_name = settings.ATLAS_VECTOR_SEARCH_INDEX_NAME
         self.embedding_field_name = settings.EMBEDDING_FIELD_NAME
         self.vector_index_dimension = settings.VECTOR_INDEX_DIMENSION
@@ -72,12 +72,15 @@ class PyMongoDriver:
         :param query: The query to be made
         :param total_response_required: total number of response to be sent.
         """
-        return self.collection.aggregate([{
-            '$vectorSearch': {
-                "index": self.atlas_vector_search_index_name,
-                "path": self.embedding_field_name,
-                "queryVector": OpenAiService.generate_embeddings(query),
-                "numCandidates": self.number_of_neighbours,
-                "limit": total_response_required,
+        return self.collection.aggregate([
+            {'$match': { 'project': query['project'] }},
+            {
+                '$vectorSearch': {
+                    "index": self.atlas_vector_search_index_name,
+                    "path": self.embedding_field_name,
+                    "queryVector": OpenAiService.generate_embeddings(query['data']),
+                    "numCandidates": self.number_of_neighbours,
+                    "limit": total_response_required,
+                }
             }
-        }])
+        ])
