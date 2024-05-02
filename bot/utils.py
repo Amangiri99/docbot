@@ -1,6 +1,8 @@
+import datetime
+
 import openai
 import pymongo
-from pymongo import ReplaceOne
+from pymongo import InsertOne, IndexModel
 from django.conf import settings
 
 class OpenAiService:    
@@ -42,17 +44,20 @@ class PyMongoDriver:
         self.data_field_name = settings.DATA_FIELD_NAME
         self.number_of_neighbours = settings.NUMBER_OF_NEIGHBOURS
 
-    def create_vector_embedding(self):
+    def create_vector_document(self, data, vector, file_name, project_name):
         """
         Function to create vector embedding
+        :param data: The data to be stored in the db.
+        :param vector: The vector generated for the data.
+        :param file_name: The name of the file.
+        :param project_name: The name of the project.
         """
-        # Update the collection with the embeddings
-        requests = []
-        for doc in self.collection_name.find({self.data_field_name :{"$exists": True}}).limit(500):
-            doc[self.EMBEDDING_FIELD_NAME] = OpenAiService.generate_embeddings(doc[self.data_field_name])
-        requests.append(ReplaceOne({'_id': doc['_id']}, doc))
-
-        self.collection_name.bulk_write(requests)
+        self.collection_name.insert_one({
+            "data": data,
+            "vector": vector,
+            "file_name": file_name,
+            "project_name": project_name
+        })
     
     def create_vector_search_index(self):
         """
