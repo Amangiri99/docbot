@@ -12,12 +12,11 @@ class QuestionResponseSerializer(rest_serializers.Serializer):
 class UploadDocSerializer(rest_serializers.Serializer):
     data = rest_serializers.FileField(write_only=True)
     file_name = rest_serializers.CharField()
-    project = rest_serializers  .CharField()
+    project = rest_serializers.CharField()
 
     def save(self):
         content = self.validated_data['data'].open('r').read()
-        pymongo_driver = bot_utils.PyMongoDriver()
-        pymongo_driver.create_vector_document(
+        bot_utils.PyMongoDriver().create_vector_document(
             content,
             bot_utils.OpenAiService.generate_embeddings(content),
             self.validated_data['file_name'],
