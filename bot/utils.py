@@ -3,7 +3,7 @@ import pymongo
 from pymongo import ReplaceOne
 from django.conf import settings
 
-class OpenAiInteractor:    
+class OpenAiService:    
     def __init__(self) -> None:
         pass
 
@@ -27,6 +27,7 @@ class PyMongoDriver:
         """Method to create a new instance for the Class"""
         if cls._instance is None:
             cls._instance = super().__new__(cls)
+            # Creates a singleton class of the pymongo client.
             cls._instance.client = pymongo.MongoClient(settings.MONGODB_ATLAS_CLUSTER_URI)
         return cls._instance
 
