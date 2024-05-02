@@ -49,7 +49,7 @@ class PyMongoDriver:
         # Update the collection with the embeddings
         requests = []
         for doc in self.collection_name.find({self.data_field_name :{"$exists": True}}).limit(500):
-            doc[self.EMBEDDING_FIELD_NAME] = OpenAiInteractor.generate_embeddings(doc[self.data_field_name])
+            doc[self.EMBEDDING_FIELD_NAME] = OpenAiService.generate_embeddings(doc[self.data_field_name])
         requests.append(ReplaceOne({'_id': doc['_id']}, doc))
 
         self.collection_name.bulk_write(requests)
@@ -77,7 +77,7 @@ class PyMongoDriver:
             '$vectorSearch': {
                 "index": self.atlas_vector_search_index_name,
                 "path": self.embedding_field_name,
-                "queryVector": OpenAiInteractor.generate_embeddings(query),
+                "queryVector": OpenAiService.generate_embeddings(query),
                 "numCandidates": self.number_of_neighbours,
                 "limit": total_response_required,
             }
