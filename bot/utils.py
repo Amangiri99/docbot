@@ -16,15 +16,30 @@ class OpenAiInteractor:
             input=[text], model=instance.model_name
         ).data[0].embedding
 
+
 class PyMongoDriver:
+    """
+    Class with methods to interact with mongodb instance
+    """
+    _instance = None
+
+    def __new__(cls):
+        """Method to create a new instance for the Class"""
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance.client = pymongo.MongoClient(settings.MONGODB_ATLAS_CLUSTER_URI)
+        return cls._instance
+
     def __init__(self) -> None:
-        self.client = pymongo.MongoClient(settings.MONGODB_ATLAS_CLUSTER_URI)
-        self.db_name = self.client[settings.MONGO_DB_NAME]
+        """Method to initialize the instance variables."""
+        self.db_name = self._instance.client[settings.MONGO_DB_NAME]
         self.collection_name = self.db_name[settings.COLLECTION_NAME]
         self.atlas_vector_search_index_name = settings.ATLAS_VECTOR_SEARCH_INDEX_NAME
         self.embedding_field_name = settings.EMBEDDING_FIELD_NAME
         self.model_name = settings.MODEL_NAME
         self.vector_index_dimension = settings.VECTOR_INDEX_DIMENSION
+        self.data_field_name = settings.DATA_FIELD_NAME
+        self.number_of_neighbours = settings.NUMBER_OF_NEIGHBOURS
 
     def create_vector_embedding(self):
         """
@@ -32,9 +47,8 @@ class PyMongoDriver:
         """
         # Update the collection with the embeddings
         requests = []
-
-        for doc in self.collection_name.find({'plot':{"$exists": True}}).limit(500):
-            doc[self.EMBEDDING_FIELD_NAME] = OpenAiInteractor.generate_embedding(doc['plot'])
+        for doc in self.collection_name.find({self.data_field_name :{"$exists": True}}).limit(500):
+            doc[self.EMBEDDING_FIELD_NAME] = OpenAiInteractor.generate_embeddings(doc['plot'])
         requests.append(ReplaceOne({'_id': doc['_id']}, doc))
 
         self.collection_name.bulk_write(requests)
@@ -62,8 +76,8 @@ class PyMongoDriver:
             '$vectorSearch': {
                 "index": self.atlas_vector_search_index_name,
                 "path": self.embedding_field_name,
-                "queryVector": OpenAiInteractor.generate_embedding(query),
-                "numCandidates": 50,
+                "queryVector": OpenAiInteractor.generate_embeddings(query),
+                "numCandidates": self.number_of_neighbours,
                 "limit": total_response_required,
             }
         }])
