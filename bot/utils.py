@@ -3,17 +3,17 @@ import pymongo
 from pymongo import ReplaceOne
 from django.conf import settings
 
-class OpenAiInteractor:
+class OpenAiInteractor:    
     def __init__(self) -> None:
-        self.model_name = settings.MODEL_NAME
-    
+        pass
+
     @staticmethod
-    def generate_embeddings(instance, text):
+    def generate_embeddings(text):
         """
         Function to generate embeddings for a text.
         """
         return openai.embeddings.create(
-            input=[text], model=instance.model_name
+            input=[text], model=settings.MODEL_NAME
         ).data[0].embedding
 
 
@@ -48,7 +48,7 @@ class PyMongoDriver:
         # Update the collection with the embeddings
         requests = []
         for doc in self.collection_name.find({self.data_field_name :{"$exists": True}}).limit(500):
-            doc[self.EMBEDDING_FIELD_NAME] = OpenAiInteractor.generate_embeddings(doc['plot'])
+            doc[self.EMBEDDING_FIELD_NAME] = OpenAiInteractor.generate_embeddings(doc[self.data_field_name])
         requests.append(ReplaceOne({'_id': doc['_id']}, doc))
 
         self.collection_name.bulk_write(requests)
