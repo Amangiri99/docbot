@@ -119,7 +119,7 @@ class PyMongoDriver:
         """
         return self.db_name[collection].update_one(query, update_operation, upsert=True)
 
-    def get_documents(self, collection, query, projection, options={}):
+    def get_documents(self, collection, query={}, projection={}, options={}):
         """
         Function to return all the documents that matches a query.
         """
