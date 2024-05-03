@@ -62,7 +62,6 @@ class PyMongoDriver:
         """Method to initialize the instance variables."""
         self.db_name = self._instance.client[settings.MONGO_DB_NAME]
         self.collection = self.db_name[settings.COLLECTION_NAME]
-        self.project_collection = self.db_name[settings.PROJECT_COLLECTION_NAME]
         self.atlas_vector_search_index_name = settings.ATLAS_VECTOR_SEARCH_INDEX_NAME
         self.embedding_field_name = settings.EMBEDDING_FIELD_NAME
         self.vector_index_dimension = settings.VECTOR_INDEX_DIMENSION
@@ -111,19 +110,17 @@ class PyMongoDriver:
             collections.append(itr["data"])
         return collections
 
-    def create_project(self, data):
+    def create_update_document(self, query, update_operation, collection):
         """
         Function to create a project
         """
-        query = {"project_name": data["project_name"]}
-        update_operation = {"$set": data}
-        return self.project_collection.update_one(query, update_operation, upsert=True)
+        return self.db_name.collection.update_one(query, update_operation, upsert=True)
 
-    def get_project_names(self, query):
+    def get_documents(self, query, collection):
         """
         Function to return all the collections that matches a query.
         """
-        cursor = self.project_collection.find(query)
+        cursor = self.db_name.collection.find(query)
         documents = []
         for document in cursor:
             documents.append(document)

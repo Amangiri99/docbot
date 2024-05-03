@@ -1,5 +1,7 @@
 import datetime
 
+from django.conf import settings
+
 from rest_framework import serializers as rest_serializers
 from bot import utils as bot_utils
 
@@ -41,4 +43,8 @@ class ProjectNameSerializer(rest_serializers.Serializer):
     created_at = rest_serializers.DateTimeField(default=datetime.datetime.now())
 
     def save(self, **kwargs):
-        return bot_utils.PyMongoDriver().create_project(self.validated_data)
+        query = {"project_name": self.validated_data["project_name"]}
+        update_operation = {"$set": self.validated_data}
+        return bot_utils.PyMongoDriver().create_update_document(
+            query, update_operation, settings.PROJECT_COLLECTION_NAME
+        )

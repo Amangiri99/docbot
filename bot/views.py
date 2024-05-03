@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from rest_framework import (
     response as rest_response,
     generics as rest_generics,
@@ -40,10 +42,12 @@ class UploadDocView(rest_generics.CreateAPIView):
 
 class GetProjectName(rest_generics.ListCreateAPIView):
     """
-    API to get all project names
+    API to get or create projects
     """
 
     serializer_class = bot_serializers.ProjectNameSerializer
 
     def get_queryset(self):
-        return bot_utils.PyMongoDriver().get_project_names(query={})
+        return bot_utils.PyMongoDriver().get_documents(
+            query={}, collection=settings.PROJECT_COLLECTION_NAME
+        )
