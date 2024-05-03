@@ -23,13 +23,38 @@ class QuestionResponseView(rest_views.APIView):
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
 
+        mongo_driver = bot_utils.PyMongoDriver()
+        last_chat_records = mongo_driver.get_documents(
+            collection=settings.COLLECTION_NAME,
+            query={"project_name": {"$eq": validated_data["project_name"]}},
+            projection={"vector": 0},
+            options={
+                "limit": settings.TOTAL_PAST_CHAT_TO_INCLUDE,
+                "sort": {"created_at": -1},
+            },
+        )
+        if last_chat_records:
+            prompt_message = "\n".join(
+                chat_record["data"] for chat_record in last_chat_records
+            )
+            prompt_message += "\nHeres a the last set of converstaions, If you find it relevant consider using them in your next answer or skip"
+
         # Get related collections
-        related_collections = bot_utils.PyMongoDriver().get_related_collections(
+        related_collections = mongo_driver.get_related_collections(
             validated_data["question"], validated_data["project_name"]
         )
         # Pass related documents to GPT for response
         response = bot_utils.OpenAIService().search_message_in_docs(
-            validated_data["question"], related_collections
+            validated_data["question"],
+            related_collections,
+            additional_prompt_message=prompt_message,
+        )
+        data = f"Question:{validated_data['question']}\nAnswer:{response}"
+        mongo_driver.create_vector_document(
+            data=data,
+            vector=bot_utils.OpenAIService.generate_embeddings(data),
+            file_name=last_chat_records[0]["file_name"],
+            project_name=validated_data["project_name"],
         )
 
         return rest_response.Response({"response": response})
@@ -53,5 +78,6 @@ class GetProjectName(rest_generics.ListCreateAPIView):
 
     def get_queryset(self):
         return bot_utils.PyMongoDriver().get_documents(
-            query={}, collection=bot_constants.PROJECT_COLLECTION_NAME
+            collection=bot_constants.PROJECT_COLLECTION_NAME,
+            query={},
         )
