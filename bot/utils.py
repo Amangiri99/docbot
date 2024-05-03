@@ -3,6 +3,7 @@ import pymongo
 from openai import embeddings, OpenAI
 
 from django.conf import settings
+from langchain_openai import ChatOpenAI
 
 
 class OpenAIService:
@@ -69,7 +70,7 @@ class PyMongoDriver:
         self.number_of_candidates = settings.NUMBER_OF_CANDIDATES
         self.nearest_doc_count = settings.NEAREST_DOC_COUNT
 
-    def create_vector_document(self, data, vector, file_name, project_name):
+    def create_vector_document(self, data, file_name, project_name):
         """
         Function to create vector embedding
         :param data: The data to be stored in the db.
@@ -80,7 +81,7 @@ class PyMongoDriver:
         self.collection.insert_one(
             {
                 "data": data,
-                "vector": vector,
+                "vector": OpenAIService.generate_embeddings(data),
                 "file_name": file_name,
                 "project_name": project_name,
             }
@@ -119,3 +120,8 @@ class PyMongoDriver:
         """
         cursor = self.db_name[collection].find(query)
         return [document for document in cursor]
+
+
+def load_llm():
+    return ChatOpenAI(temperature=0, model_name=settings.GPT_MODEL_NAME)
+
