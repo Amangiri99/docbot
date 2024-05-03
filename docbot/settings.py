@@ -37,10 +37,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
     "bot",
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -113,17 +115,17 @@ USE_I18N = True
 USE_TZ = True
 
 # Private API keys
-MONGODB_ATLAS_CLUSTER_URI = os.environ.get('MONGODB_ATLAS_CLUSTER_URI', '')
-MONGO_DB_NAME = os.environ.get('MONGO_DB_NAME', '')
-ATLAS_VECTOR_SEARCH_INDEX_NAME = os.environ.get('ATLAS_VECTOR_SEARCH_INDEX_NAME', '')
-EMBEDDING_FIELD_NAME = os.environ.get('EMBEDDING_FIELD_NAME', '')
-GPT_MODEL_NAME = os.environ.get('GPT_MODEL_NAME', '')
-EMBEDDINGS_MODEL_NAME = os.environ.get('EMBEDDINGS_MODEL_NAME', '')
-COLLECTION_NAME = os.environ.get('COLLECTION_NAME', '')
-VECTOR_INDEX_DIMENSION = os.environ.get('VECTOR_INDEX_DIMENSION', 1536)
-DATA_FIELD_NAME = os.environ.get('DATA_FIELD_NAME', '')
-NUMBER_OF_CANDIDATES = int(os.environ.get('NUMBER_OF_CANDIDATES', 50))
-NEAREST_DOC_COUNT = int(os.environ.get('NEAREST_DOC_COUNT', 2))
+MONGODB_ATLAS_CLUSTER_URI = os.environ.get("MONGODB_ATLAS_CLUSTER_URI", "")
+MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", "")
+ATLAS_VECTOR_SEARCH_INDEX_NAME = os.environ.get("ATLAS_VECTOR_SEARCH_INDEX_NAME", "")
+EMBEDDING_FIELD_NAME = os.environ.get("EMBEDDING_FIELD_NAME", "")
+GPT_MODEL_NAME = os.environ.get("GPT_MODEL_NAME", "")
+EMBEDDINGS_MODEL_NAME = os.environ.get("EMBEDDINGS_MODEL_NAME", "")
+COLLECTION_NAME = os.environ.get("COLLECTION_NAME", "")
+VECTOR_INDEX_DIMENSION = os.environ.get("VECTOR_INDEX_DIMENSION", 1536)
+DATA_FIELD_NAME = os.environ.get("DATA_FIELD_NAME", "")
+NUMBER_OF_CANDIDATES = int(os.environ.get("NUMBER_OF_CANDIDATES", 50))
+NEAREST_DOC_COUNT = int(os.environ.get("NEAREST_DOC_COUNT", 2))
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
@@ -134,3 +136,5 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+CORS_ALLOW_ALL_ORIGINS = True

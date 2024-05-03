@@ -7,6 +7,7 @@ class QuestionResponseSerializer(rest_serializers.Serializer):
     """
     Serializer to validate given input, create/store embeddings & fetch result of question
     """
+
     question = rest_serializers.CharField(max_length=1024)
     project_name = rest_serializers.CharField(max_length=128)
 
@@ -15,15 +16,16 @@ class UploadDocSerializer(rest_serializers.Serializer):
     """
     Serializer to validate incoming data and store file as vector document
     """
+
     file = rest_serializers.FileField(write_only=True)
     file_name = rest_serializers.CharField()
     project_name = rest_serializers.CharField()
 
     def save(self):
-        content = self.validated_data['file'].open('r').read()
+        content = self.validated_data["file"].open("r").read()
         bot_utils.PyMongoDriver().create_vector_document(
             content,
             bot_utils.OpenAIService.generate_embeddings(content),
-            self.validated_data['file_name'],
-            self.validated_data['project_name']
+            self.validated_data["file_name"],
+            self.validated_data["project_name"],
         )
