@@ -4,12 +4,17 @@ from bot import utils as bot_utils
 
 
 class QuestionResponseSerializer(rest_serializers.Serializer):
-    "Serializer to validate given input, create/store embeddings & fetch result of question"
-    question = rest_serializers.CharField(max_length=1000)
+    """
+    Serializer to validate given input, create/store embeddings & fetch result of question
+    """
+    question = rest_serializers.CharField(max_length=1024)
     project_name = rest_serializers.CharField(max_length=128)
 
 
 class UploadDocSerializer(rest_serializers.Serializer):
+    """
+    Serializer to validate incoming data and store file as vector document
+    """
     file = rest_serializers.FileField(write_only=True)
     file_name = rest_serializers.CharField()
     project_name = rest_serializers.CharField()
