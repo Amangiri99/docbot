@@ -111,11 +111,11 @@ class PyMongoDriver:
         """
         Function to update a document or create one if it doesn't exist
         """
-        return self.db_name.collection.update_one(query, update_operation, upsert=True)
+        return self.db_name[collection].update_one(query, update_operation, upsert=True)
 
     def get_documents(self, query, collection):
         """
         Function to return all the documents that matches a query.
         """
-        cursor = self.db_name.collection.find(query)
+        cursor = self.db_name[collection].find(query)
         return [document for document in cursor]
