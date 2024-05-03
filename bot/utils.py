@@ -20,12 +20,12 @@ class OpenAIService:
             # Call the OpenAI GPT model to generate a response
             response = OpenAI().chat.completions.create(
                 model=settings.GPT_MODEL_NAME,
-                messages=[
-                    {"role": "user", "content": message}
-                ]
+                messages=[{"role": "user", "content": message}],
             )
             # Extract the response text
-            return json.loads(response.model_dump_json())['choices'][0]['message']['content']
+            return json.loads(response.model_dump_json())["choices"][0]["message"][
+                "content"
+            ]
         except:
             return "Unable to process your query, please try again"
 
@@ -34,15 +34,18 @@ class OpenAIService:
         """
         Function to generate embeddings for a text.
         """
-        return embeddings.create(
-            input=[text], model=settings.EMBEDDINGS_MODEL_NAME
-        ).data[0].embedding
+        return (
+            embeddings.create(input=[text], model=settings.EMBEDDINGS_MODEL_NAME)
+            .data[0]
+            .embedding
+        )
 
 
 class PyMongoDriver:
     """
     Class with methods to interact with mongodb instance
     """
+
     _instance = None
 
     def __new__(cls):
@@ -50,7 +53,9 @@ class PyMongoDriver:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             # Creates a singleton class of the pymongo client.
-            cls._instance.client = pymongo.MongoClient(settings.MONGODB_ATLAS_CLUSTER_URI)
+            cls._instance.client = pymongo.MongoClient(
+                settings.MONGODB_ATLAS_CLUSTER_URI
+            )
         return cls._instance
 
     def __init__(self) -> None:
@@ -72,31 +77,35 @@ class PyMongoDriver:
         :param file_name: The name of the file.
         :param project_name: The name of the project.
         """
-        self.collection.insert_one({
-            "data": data,
-            "vector": vector,
-            "file_name": file_name,
-            "project_name": project_name
-        })
+        self.collection.insert_one(
+            {
+                "data": data,
+                "vector": vector,
+                "file_name": file_name,
+                "project_name": project_name,
+            }
+        )
 
     def get_related_collections(self, question, project_name):
         """
         Function to get k related collections from db
         :param query: The query to be made
         """
-        cursor = self.collection.aggregate([
-            {
-                '$vectorSearch': {
-                    "index": self.atlas_vector_search_index_name,
-                    "path": self.embedding_field_name,
-                    "queryVector": OpenAIService.generate_embeddings(question),
-                    "numCandidates": self.number_of_candidates,
-                    "limit": self.nearest_doc_count,
-                }
-            },
-            {'$match': { 'project_name': project_name }}
-        ])
+        cursor = self.collection.aggregate(
+            [
+                {
+                    "$vectorSearch": {
+                        "index": self.atlas_vector_search_index_name,
+                        "path": self.embedding_field_name,
+                        "queryVector": OpenAIService.generate_embeddings(question),
+                        "numCandidates": self.number_of_candidates,
+                        "limit": self.nearest_doc_count,
+                    }
+                },
+                {"$match": {"project_name": project_name}},
+            ]
+        )
         collections = []
         for itr in cursor:
-            collections.append(itr['data'])
+            collections.append(itr["data"])
         return collections
