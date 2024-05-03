@@ -100,9 +100,9 @@ class PyMongoDriver:
                         "queryVector": OpenAIService.generate_embeddings(question),
                         "numCandidates": self.number_of_candidates,
                         "limit": self.nearest_doc_count,
+                        "filter": {"project_name": {"$eq": project_name}}
                     }
                 },
-                {"$match": {"project_name": project_name}},
             ]
         )
         return [document["data"] for document in cursor]
