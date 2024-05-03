@@ -1,16 +1,41 @@
-import openai
+import json
 import pymongo
+from openai import embeddings, OpenAI
+
 from django.conf import settings
 
-class OpenAiService:
+
+class OpenAIService:
+    def search_message_in_docs(self, query, documents):
+        """
+        Function to create a message using user query & relevant documents
+        """
+
+        # Prepare the message with the message and documents
+        message = f"My question: {query}\nAnswer using:\n"
+        for doc in documents:
+            message += f"- {doc}\n"
+
+        try:
+            # Call the OpenAI GPT model to generate a response
+            response = OpenAI().chat.completions.create(
+                model=settings.GPT_MODEL_NAME,
+                messages=[
+                    {"role": "user", "content": message}
+                ]
+            )
+            # Extract the response text
+            return json.loads(response.model_dump_json())['choices'][0]['message']['content']
+        except:
+            return "Unable to process your query, please try again"
 
     @staticmethod
     def generate_embeddings(text):
         """
         Function to generate embeddings for a text.
         """
-        return openai.embeddings.create(
-            input=[text], model=settings.GPT_MODEL_NAME
+        return embeddings.create(
+            input=[text], model=settings.EMBEDDINGS_MODEL_NAME
         ).data[0].embedding
 
 
@@ -36,7 +61,8 @@ class PyMongoDriver:
         self.embedding_field_name = settings.EMBEDDING_FIELD_NAME
         self.vector_index_dimension = settings.VECTOR_INDEX_DIMENSION
         self.data_field_name = settings.DATA_FIELD_NAME
-        self.number_of_neighbours = settings.NUMBER_OF_NEIGHBOURS
+        self.number_of_candidates = settings.NUMBER_OF_CANDIDATES
+        self.nearest_doc_count = settings.NEAREST_DOC_COUNT
 
     def create_vector_document(self, data, vector, file_name, project_name):
         """
@@ -53,34 +79,24 @@ class PyMongoDriver:
             "project_name": project_name
         })
 
-    def create_vector_search_index(self):
+    def get_related_collections(self, question, project_name):
         """
-        Function to create a vector search index in the mongo db. 
-        """
-        self.collection.create_search_index({
-            "fields": [{
-                "numDimensions": self.vector_index_dimension,
-                "path": self.embedding_field_name,
-                "similarity": "dotProduct",
-                "type": "vector"
-            }]
-        })
-
-    def get_results(self, query, total_response_required):
-        """
-        Function to get result from the vector search table
+        Function to get k related collections from db
         :param query: The query to be made
-        :param total_response_required: total number of response to be sent.
         """
-        return self.collection.aggregate([
-            {'$match': { 'project': query['project'] }},
+        cursor = self.collection.aggregate([
             {
                 '$vectorSearch': {
                     "index": self.atlas_vector_search_index_name,
                     "path": self.embedding_field_name,
-                    "queryVector": OpenAiService.generate_embeddings(query['data']),
-                    "numCandidates": self.number_of_neighbours,
-                    "limit": total_response_required,
+                    "queryVector": OpenAIService.generate_embeddings(question),
+                    "numCandidates": self.number_of_candidates,
+                    "limit": self.nearest_doc_count,
                 }
-            }
+            },
+            {'$match': { 'project_name': project_name }}
         ])
+        collections = []
+        for itr in cursor:
+            collections.append(itr['data'])
+        return collections
