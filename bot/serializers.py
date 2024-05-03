@@ -3,7 +3,10 @@ import datetime
 from django.conf import settings
 
 from rest_framework import serializers as rest_serializers
-from bot import utils as bot_utils
+from bot import (
+    constants as bot_constants,
+    utils as bot_utils,
+)
 
 
 class QuestionResponseSerializer(rest_serializers.Serializer):
@@ -36,7 +39,7 @@ class UploadDocSerializer(rest_serializers.Serializer):
 
 class ProjectNameSerializer(rest_serializers.Serializer):
     """
-    Serializer to return a list of all projects
+    Serializer to parse project name and created.
     """
 
     project_name = rest_serializers.CharField(max_length=128, required=True)
@@ -46,5 +49,5 @@ class ProjectNameSerializer(rest_serializers.Serializer):
         query = {"project_name": self.validated_data["project_name"]}
         update_operation = {"$set": self.validated_data}
         return bot_utils.PyMongoDriver().create_update_document(
-            query, update_operation, settings.PROJECT_COLLECTION_NAME
+            query, update_operation, bot_constants.PROJECT_COLLECTION_NAME
         )

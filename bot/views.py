@@ -6,7 +6,11 @@ from rest_framework import (
     views as rest_views,
 )
 
-from bot import serializers as bot_serializers, utils as bot_utils
+from bot import (
+    constants as bot_constants,
+    serializers as bot_serializers,
+    utils as bot_utils,
+)
 
 
 class QuestionResponseView(rest_views.APIView):
@@ -49,5 +53,5 @@ class GetProjectName(rest_generics.ListCreateAPIView):
 
     def get_queryset(self):
         return bot_utils.PyMongoDriver().get_documents(
-            query={}, collection=settings.PROJECT_COLLECTION_NAME
+            query={}, collection=bot_constants.PROJECT_COLLECTION_NAME
         )

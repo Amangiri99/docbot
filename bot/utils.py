@@ -105,23 +105,17 @@ class PyMongoDriver:
                 {"$match": {"project_name": project_name}},
             ]
         )
-        collections = []
-        for itr in cursor:
-            collections.append(itr["data"])
-        return collections
+        return [document["data"] for document in cursor]
 
     def create_update_document(self, query, update_operation, collection):
         """
-        Function to create a project
+        Function to update a document or create one if it doesn't exist
         """
         return self.db_name.collection.update_one(query, update_operation, upsert=True)
 
     def get_documents(self, query, collection):
         """
-        Function to return all the collections that matches a query.
+        Function to return all the documents that matches a query.
         """
         cursor = self.db_name.collection.find(query)
-        documents = []
-        for document in cursor:
-            documents.append(document)
-        return documents
+        return [document for document in cursor]
