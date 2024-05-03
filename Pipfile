@@ -11,6 +11,7 @@ python-dotenv = "==1.0.1"
 openai = "==1.25.1"
 requests = "==2.31.0"
 django-cors-headers = "==4.3.1"
+langchain = "*"
 
 [dev-packages]
 black = "==24.4.2"
