@@ -122,7 +122,6 @@ class PyMongoDriver:
         return [document for document in cursor]
 
 
-# llm_model = None
 def load_llm():
     return ChatOpenAI(temperature=0, model_name=settings.GPT_MODEL_NAME)
 
