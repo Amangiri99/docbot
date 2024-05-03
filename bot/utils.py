@@ -3,10 +3,6 @@ import pymongo
 from openai import embeddings, OpenAI
 
 from django.conf import settings
-from ctransformers import AutoModelForCausalLM
-from transformers import AutoTokenizer
-from langchain.callbacks.manager import CallbackManager
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain_openai import ChatOpenAI
 
 
@@ -128,5 +124,5 @@ class PyMongoDriver:
 
 # llm_model = None
 def load_llm():
-    return ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo-1106")
+    return ChatOpenAI(temperature=0, model_name=settings.GPT_MODEL_NAME)
 

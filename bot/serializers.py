@@ -2,9 +2,9 @@ import datetime
 
 from django.conf import settings
 
-from langchain.text_splitter import CharacterTextSplitter
 from langchain.chains.summarize import load_summarize_chain
 from langchain.docstore.document import Document
+from langchain.text_splitter import CharacterTextSplitter
 from rest_framework import serializers as rest_serializers
 
 from bot import (
