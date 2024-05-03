@@ -1,4 +1,5 @@
-# serializers.py
+import datetime
+
 from rest_framework import serializers as rest_serializers
 from bot import utils as bot_utils
 
@@ -29,3 +30,15 @@ class UploadDocSerializer(rest_serializers.Serializer):
             self.validated_data["file_name"],
             self.validated_data["project_name"],
         )
+
+
+class ProjectNameSerializer(rest_serializers.Serializer):
+    """
+    Serializer to return a list of all projects
+    """
+
+    project_name = rest_serializers.CharField(max_length=128, required=True)
+    created_at = rest_serializers.DateTimeField(default=datetime.datetime.now())
+
+    def save(self, **kwargs):
+        return bot_utils.PyMongoDriver().create_project(self.validated_data)

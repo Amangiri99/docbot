@@ -26,7 +26,7 @@ class QuestionResponseView(rest_views.APIView):
             validated_data["question"], related_collections
         )
 
-        return rest_response.Response({ "response": response })
+        return rest_response.Response({"response": response})
 
 
 # Create your views here.
@@ -36,3 +36,14 @@ class UploadDocView(rest_generics.CreateAPIView):
     """
 
     serializer_class = bot_serializers.UploadDocSerializer
+
+
+class GetProjectName(rest_generics.ListCreateAPIView):
+    """
+    API to get all project names
+    """
+
+    serializer_class = bot_serializers.ProjectNameSerializer
+
+    def get_queryset(self):
+        return bot_utils.PyMongoDriver().get_project_names(query={})

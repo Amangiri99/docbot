@@ -126,6 +126,7 @@ VECTOR_INDEX_DIMENSION = os.environ.get("VECTOR_INDEX_DIMENSION", 1536)
 DATA_FIELD_NAME = os.environ.get("DATA_FIELD_NAME", "")
 NUMBER_OF_CANDIDATES = int(os.environ.get("NUMBER_OF_CANDIDATES", 50))
 NEAREST_DOC_COUNT = int(os.environ.get("NEAREST_DOC_COUNT", 2))
+PROJECT_COLLECTION_NAME = os.environ.get("PROJECT_COLLECTION_NAME", "")
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
