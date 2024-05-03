@@ -1,10 +1,16 @@
+from django.conf import settings
+
 from rest_framework import (
     response as rest_response,
     generics as rest_generics,
     views as rest_views,
 )
 
-from bot import serializers as bot_serializers, utils as bot_utils
+from bot import (
+    constants as bot_constants,
+    serializers as bot_serializers,
+    utils as bot_utils,
+)
 
 
 class QuestionResponseView(rest_views.APIView):
@@ -26,7 +32,7 @@ class QuestionResponseView(rest_views.APIView):
             validated_data["question"], related_collections
         )
 
-        return rest_response.Response({ "response": response })
+        return rest_response.Response({"response": response})
 
 
 # Create your views here.
@@ -36,3 +42,16 @@ class UploadDocView(rest_generics.CreateAPIView):
     """
 
     serializer_class = bot_serializers.UploadDocSerializer
+
+
+class GetProjectName(rest_generics.ListCreateAPIView):
+    """
+    API to get or create projects
+    """
+
+    serializer_class = bot_serializers.ProjectNameSerializer
+
+    def get_queryset(self):
+        return bot_utils.PyMongoDriver().get_documents(
+            query={}, collection=bot_constants.PROJECT_COLLECTION_NAME
+        )
