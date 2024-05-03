@@ -26,7 +26,7 @@ class QuestionResponseView(rest_views.APIView):
             validated_data["question"], related_collections
         )
 
-        return rest_response.Response({response})
+        return rest_response.Response({ "response": response })
 
 
 # Create your views here.
