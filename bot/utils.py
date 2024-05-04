@@ -20,6 +20,21 @@ class OpenAIService:
     def load_model(self):
         return self._instance.model
 
+    @staticmethod
+    def get_related_queries(query):
+        message = f"""I will provide you a question asked by user, return me 3 correct possibilites of questions he may be asking. Return me a list of 3 strings in a json format with key only as: 'questions'. User's question is: {query}"""
+        try:
+            # Call the OpenAI GPT model to generate a response
+            response = OpenAI().chat.completions.create(
+                model=settings.GPT_MODEL_NAME,
+                messages=[{"role": "user", "content": message}],
+            )
+            openai_response = json.loads(json.loads(response.model_dump_json())["choices"][0]["message"]["content"])
+            # Extract the response text
+            return openai_response['questions']
+        except Exception as e:
+            return "Unable to process your query, please try again"
+
     def search_message_in_docs(self, query, documents):
         """
         Function to create a message using user query & relevant documents
@@ -27,7 +42,9 @@ class OpenAIService:
 
         if len(documents) == 0:
             return "Unable to process your query due to insufficient data"
-        
+
+        queries = OpenAIService.get_related_queries(query)
+        # Prepare the message with the message and documents
         context = ''
         for doc in documents:
             context += f"- {doc}\n"
@@ -39,7 +56,12 @@ class OpenAIService:
             Question: {query}
             """
         for doc in documents:
-            message += f"- {doc}\n"
+            context += f"- {doc}\n"
+        message = f"""Answer the question based only on the following context:
+            {context}
+
+            Question is [Note: return me single answer considering all questions]: {queries}
+            """
 
         try:
             # Call the OpenAI GPT model to generate a response
@@ -48,9 +70,7 @@ class OpenAIService:
                 messages=[{"role": "user", "content": message}],
             )
             # Extract the response text
-            return json.loads(response.model_dump_json())["choices"][0]["message"][
-                "content"
-            ]
+            return json.loads(response.model_dump_json())["choices"][0]["message"]["content"]
         except:
             return "Unable to process your query, please try again"
 
