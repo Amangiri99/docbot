@@ -48,15 +48,6 @@ class OpenAIService:
         context = ''
         for doc in documents:
             context += f"- {doc}\n"
-
-        # Prepare the message with the message and documents
-        message = f"""Answer the question based only on the following context:
-            {context}
-
-            Question: {query}
-            """
-        for doc in documents:
-            context += f"- {doc}\n"
         message = f"""Answer the question based only on the following context:
             {context}
 
