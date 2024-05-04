@@ -31,7 +31,7 @@ class OpenAIService:
             return json.loads(response.model_dump_json())["choices"][0]["message"][
                 "content"
             ]
-        except Exception as e:
+        except:
             return "Unable to process your query, please try again"
 
     @staticmethod
