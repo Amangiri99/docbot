@@ -1,4 +1,3 @@
-import datetime
 import json
 import pymongo
 from openai import embeddings, OpenAI
@@ -8,7 +7,7 @@ from langchain_openai import ChatOpenAI
 
 
 class OpenAIService:
-    def search_message_in_docs(self, query, documents, additional_prompt_message):
+    def search_message_in_docs(self, query, documents):
         """
         Function to create a message using user query & relevant documents
         """
@@ -17,9 +16,6 @@ class OpenAIService:
         message = f"My question: {query}\nAnswer using:\n"
         for doc in documents:
             message += f"- {doc}\n"
-
-        if additional_prompt_message:
-            message += additional_prompt_message
 
         try:
             # Call the OpenAI GPT model to generate a response
@@ -88,7 +84,6 @@ class PyMongoDriver:
                 "vector": OpenAIService.generate_embeddings(data),
                 "file_name": file_name,
                 "project_name": project_name,
-                "created_at": datetime.datetime.now(),
             }
         )
 
@@ -106,7 +101,7 @@ class PyMongoDriver:
                         "queryVector": OpenAIService.generate_embeddings(question),
                         "numCandidates": self.number_of_candidates,
                         "limit": self.nearest_doc_count,
-                        "filter": {"project_name": {"$eq": project_name}},
+                        "filter": {"project_name": {"$eq": project_name}}
                     }
                 },
             ]
@@ -119,11 +114,11 @@ class PyMongoDriver:
         """
         return self.db_name[collection].update_one(query, update_operation, upsert=True)
 
-    def get_documents(self, collection, query, projection, options={}):
+    def get_documents(self, query, collection):
         """
         Function to return all the documents that matches a query.
         """
-        cursor = self.db_name[collection].find(query, projection, **options)
+        cursor = self.db_name[collection].find(query)
         return [document for document in cursor]
 
 
