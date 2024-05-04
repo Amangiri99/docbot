@@ -25,8 +25,19 @@ class OpenAIService:
         Function to create a message using user query & relevant documents
         """
 
+        if len(documents) == 0:
+            return "Unable to process your query due to insufficient data"
+        
+        context = ''
+        for doc in documents:
+            context += f"- {doc}\n"
+
         # Prepare the message with the message and documents
-        message = f"My question: {query}\nAnswer using:\n"
+        message = f"""Answer the question based only on the following context:
+            {context}
+
+            Question: {query}
+            """
         for doc in documents:
             message += f"- {doc}\n"
 
@@ -100,7 +111,7 @@ class PyMongoDriver:
             }
         )
 
-    def get_related_collections(self, question, project_name):
+    def get_related_documents(self, question, project_name):
         """
         Function to get k related collections from db
         :param query: The query to be made

@@ -23,13 +23,16 @@ class QuestionResponseView(rest_views.APIView):
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
 
+        print('Fetching documents from database')
         # Get related collections
-        related_collections = bot_utils.PyMongoDriver().get_related_collections(
+        related_documents = bot_utils.PyMongoDriver().get_related_documents(
             validated_data["question"], validated_data["project_name"]
         )
+
+        print('Sending query to ChatGPT')
         # Pass related documents to GPT for response
         response = bot_utils.OpenAIService().search_message_in_docs(
-            validated_data["question"], related_collections
+            validated_data["question"], related_documents
         )
 
         return rest_response.Response({"response": response})
