@@ -37,7 +37,7 @@ class QuestionResponseView(rest_views.APIView):
             prompt_message = "\n".join(
                 chat_record["data"] for chat_record in last_chat_records
             )
-            prompt_message += "\nHeres a the last set of converstaions, If you find it relevant consider using them in your next answer or skip"
+            prompt_message += "\nHere is a list of answers that might be similar to this topic, use them if they are somewhow related to the question or generate your own."
 
         # Get related collections
         related_collections = mongo_driver.get_related_collections(
@@ -49,10 +49,9 @@ class QuestionResponseView(rest_views.APIView):
             related_collections,
             additional_prompt_message=prompt_message,
         )
-        data = f"Question:{validated_data['question']}\nAnswer:{response}"
+        data = f"Previously asked Question:{validated_data['question']}\nAnswer for the previously asked question:{response}"
         mongo_driver.create_vector_document(
             data=data,
-            vector=bot_utils.OpenAIService.generate_embeddings(data),
             file_name=last_chat_records[0]["file_name"],
             project_name=validated_data["project_name"],
         )
