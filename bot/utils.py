@@ -7,6 +7,19 @@ from langchain_openai import ChatOpenAI
 
 
 class OpenAIService:
+    _instance = None
+
+    def __new__(cls):
+        """Method to create a new instance for the Class"""
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            # Creates a singleton class of the pymongo client.
+            cls._instance.model = ChatOpenAI(temperature=0, model_name=settings.GPT_MODEL_NAME)
+        return cls._instance
+
+    def load_model(self):
+        return self._instance.model
+
     def search_message_in_docs(self, query, documents):
         """
         Function to create a message using user query & relevant documents

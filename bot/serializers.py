@@ -33,7 +33,8 @@ class UploadDocSerializer(rest_serializers.Serializer):
 
     def save(self):
         content = self.validated_data["file"].open("r").read()
-        
+
+        print('Starting splitting')
         # splitting contents into chunks
         textSplitter = CharacterTextSplitter()
         chunks = textSplitter.split_text(content.decode('utf-8'))
@@ -41,24 +42,31 @@ class UploadDocSerializer(rest_serializers.Serializer):
         # converting chunks to documents
         docs = [Document(page_content=chunk) for chunk in chunks]
 
+        print('Loading Model')
         # load llm model
-        llm_model = bot_utils.load_llm()
+        llm_model = bot_utils.OpenAIService().load_model()
 
-        # create summary using the model
-        chain = load_summarize_chain(llm_model, chain_type='map_reduce')
-        response = chain.invoke(docs)
-        
-        bot_utils.PyMongoDriver().create_vector_document(
-            response['output_text'],
-            self.validated_data["file_name"],
-            self.validated_data["project_name"],
-        )
+        print('Inserting chunks in db')
         for chunk in chunks:
             bot_utils.PyMongoDriver().create_vector_document(
                 chunk,
                 self.validated_data["file_name"],
                 self.validated_data["project_name"],
             )
+
+        # create summary using the model
+        print('Creating Chain model to generate summary')
+        chain = load_summarize_chain(llm_model, chain_type='map_reduce')
+        print('Generating Summary')
+        response = chain.invoke(docs)
+
+        print('Inserting documents in db')
+        # Insert documents in database
+        bot_utils.PyMongoDriver().create_vector_document(
+            response['output_text'],
+            self.validated_data["file_name"],
+            self.validated_data["project_name"],
+        )
 
 
 class ProjectNameSerializer(rest_serializers.Serializer):
