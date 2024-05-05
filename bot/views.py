@@ -47,7 +47,7 @@ class UploadDocView(rest_generics.CreateAPIView):
     serializer_class = bot_serializers.UploadDocSerializer
 
 
-class GetProjectName(rest_generics.ListCreateAPIView):
+class ProjectNameView(rest_generics.ListCreateAPIView):
     """
     API to get or create projects
     """
